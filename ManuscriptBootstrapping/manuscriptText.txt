@@ -1,0 +1,17 @@
+[Caption]
+Phylogenetic tree based on allele frequencies for selected populations. They group into five apparent clades: Asia (yellow), Arab Peninsula and Pakistan (red), Israel, Palestine and Jordan (lightgreen), Africa (blue), Europe-caucasian (turquoise). The tree is rooted using Australian Indigenous Yuendumu as outgroup.
+
+[Materials & Methods]
+
+In addition to the locally collected HLA class I data, we acquire allele frequencies for HLA-A and HLA-B from AlleleFrequencies.net [1] using the web site's automated access method for a comprehensive list of population reference codes. We also considered HLA-C frequencies which however is only available for substantially fewer populations; moreover HLA-B and HLA-C are in linkage disequilibrium. 
+We selected populations from continents neighboring the Middle East region if they passed the following quality control criteria: 
+we rule out populations if allele frequencies were reported for different resolutions and yielded contradicting values, i.e, when subtype frequencies would not add up to the frequency of the corresponding supertype. Further we discard populations for which frequencies would not at least add up to 85% per locus. If frequencies would exceed 100% per locus (e.g., due to rounding errors), we normalize the frequencies such that their sum yields 100%.
+The final selection of populations was conducted manually, taking relevance, uniqueness and population size into account.
+The phylogenetic tree was calculated by first producing a distance matrix amongst for all selected populations using GENDIST from the PHYLIP package[2], which implements  Nei's standard genetic distance. Subsequently we calculate a Neighbor Joining tree, which is visualized in iToL [3].
+
+[1] Gonzalez-Galarza FF, Christmas S, Middleton D and Jones AR. 
+Allele frequency net: a database and online repository for immune gene frequencies in worldwide populations. 
+Nucleic Acid Research 2011 39: D913-D919
+[2] Felsenstein, J. 1989. PHYLIP - Phylogeny Inference Package (Version 3.2). Cladistics 5: 164-166. 
+[3] Letunic, Ivica, and Peer Bork. "Interactive Tree Of Life v2: online annotation and display of phylogenetic trees made easy." Nucleic acids research 39.suppl_2 (2011): W475-W478.
+	

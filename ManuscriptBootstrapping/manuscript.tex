@@ -1,0 +1,85 @@
+
+\title{Bootstrapping phylogenies with allele frequencies for few hyperpolymorphic loci}
+
+\section{Introduction}
+%From Yurek's email, not sure whether to keep it
+There is a historic basis for using HLA gene frequencies in population studies. Mainly, there are six highly polymorphic
+loci to choose between that have different frequencies between individuals and different populations. Class II genes
+appear to be older than the class I genes. Although there is some trans species HLA gene flow between human and apes,
+trans speciation is relatively minor and loci dependent. Thus, most human HLA alleles, although old, have probably
+evolved by genetic drift, selection and mutation with gene flow and admixture contributing to the polymorphisms in the
+MHC region since the split between apes and humans.
+
+Hyperpolymorphic genes such as HLA class I and II are frequently used in anthropological and population genetic studies.
+HLA typing has its roots in serology and thus experimentally, large body of data is available
+%Yurek "phylogenies from few albeit polymorphic loci"
+Because of their enormous polymorphism and differences between individuals and populations, the phylogenies of HLA genes
+are in theory highly informative for population genetics and anthropology.
+
+%The entirety of variation on those genes
+Rich databases describing
+Therein, populations are described in terms of allele frequencies (see allelefrequenciens.net paper)
+Unfortunately, the low number of genes as biomarkers in combination with phylogenetic tools that expect high numbers of
+loci for bootstrapping have led to numerous works with incorrect bootstrapping.
+They providing false confidence into produced phylogenetic trees. The ramifications of such practices have caused
+severe controversies:
+In 2002, Piazza, Risch and Cavalli-Sforza have already criticized the works of Hajjej/Arnaiz-Villena and noted that
+phylogenetic analysis  "Using results from the analysis of a single marker, particularly one likely to
+have undergone selection, for the purpose of reconstructing genealogies is unreliable and unacceptable
+practice in population genetics"
+
+Nonetheless, a large number of HLA-based phylogeny reconstruction publications have since been  published based on one
+or very few marker genes \cite{}.
+It is worth noting that HLA genes are hyperpolymorphic, and as such many columns in respective MSAs would carry
+informative value for population genetics studies. Most tree reconstruction methods assume locus independence
+(\cite{Efron1996Nov}), which yet requires a rigorous examination. The problem is not necessarily the low number of
+gene markers as long as they are hyperpolymorphic (i.e., respectively contain multiple polymorphic nucleotide loci)
+and representative enough for a species' genome or population's genepool.
+
+Most phylogenetic tools used for tree reconstruction from allele frequencies are not suitable for low numbers of marker
+genes (Phylip, DISPAN, check GenPop), since they perform bootstrapping with loci (i.e., here: genes) as units.
+If only allele frequencies from a single gene are used, conventional bootstrapping performs resampling with replacement,
+draws repeatedly from only a single locus. Trivially, this single locus is in agreement with itself, and the tools
+report 100\% branch support for all clades in the tree.
+False confidence
+Respected journals have failed to critically review this misuse of bootsrapping \cite{Villena2017Jan,Hajjej2018Mar}.
+For two genes A and B, resampling leads the combinations AA (25\%), AB (50\%) and BB (25\%). If both A and B agree on the branch split
+100\% branch split support will be reported by teh software. branch split is
+supported by both A and B, 100\
+as for example is the case in \cite{Hajjej2018Mar}.
+
+
+%of large data sets of population specific
+We here propose a method that constructs population phylogenies for HLA allele frequencies in combination with well structured databases
+with deep sequencing data for those genes.
+
+Rich databases such as AlleleFrequencies.net help to obtain population specific descriptions in terms of allele
+frequencies. Subsequently, mapping of alleles to probabilistic sequence representations enable
+the expression of equivalent information as position specific weight matrices or classic multiple sequence alignments.
+ This mapping is facilitated by comprehensive and wellstructured databases such as IMGT.
+With the algorithmic transition of gene markers to nucleotide markers
+the number of informative loci increases by orders of magnitude.
+This in turn consitutes an important prerequisite for the application of classic consensus tree construction and
+bootstrapping, as resampling from this much larger pool of loci is
+statistically more meaningful.
+
+
+
+
+\section{Methods}
+
+For all genes for which multiple sequence alignments are available, we parse the respective
+
+\section{Conclusions}
+
+The wrong practice of bootstrapping seems to be relatively common place in the HLA community.
+We would hereby like to raise awareness during three time points of the publication cycle. First, software tools like
+Phylip, DISPAN etc ought to generate warnings, when the number of provided loci is too low to subject allele frequencies to
+bootstrapping. Secondly, naturally scientists creating phylogenies should know what they are doing. Finally, journals like
+PLoS ONE need to improve review procedures for population phylogenys built with allele frequencies, in particular those with
+just one or few loci.
+
+%suitable genes
+%In [99]: [(gene, len(ptree.df[ptree.df[gene]>0.95])) for gene in sumcols]
+%Out[99]: [('sum_A', 368), ('sum_B', 352), ('sum_C', 150), ('sum_DPA', 2),
+          %('sum_DPB', 26), ('sum_DQA', 39), ('sum_DQB', 146), ('sum_DRB', 290)]
