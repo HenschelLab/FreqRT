@@ -1,0 +1,75 @@
+%%
+%% Author: ahenschel
+%% 4/21/19
+%%
+
+%HLA-A Genomic Sequence Alignments
+%IPD-IMGT/HLA Release: 3.31.0
+%Sequences Aligned: 2018 January 19
+%Steven GE Marsh, Anthony Nolan Research Institute.
+%Please see http://hla.alleles.org/terms.html for terms of use.
+
+
+\section{Methods}
+
+We download complete multiple sequence alignments from IPD-IMGT/HLA release 3.31.0. %TODO describe download source/date
+For all genes for which multiple sequence alignments are available, we parse the respective alignment file
+as obtained from IMGT (ref). The Python script is available at the github repository
+\url{https://github.com/HenschelLab/FreqRT}.
+
+
+%As our current focus is on two-digit resolution
+%(driven by the majority of population data in AlleleFrequencies.net), we extract information of polymorphic sites from IMGT's
+%gene files
+As we are aiming to capture the entirety of genetic variability associated with HLA genes/alleles, we
+parse for each HLA gene $g$ its respective multiple sequence alignment into Position Weight Matrices
+(PWM, \cite{stormo1982use}) by associating each sequence to the allele identified by the first two digits of the
+sequence identifier. This yields one PWM for each allele $A$, which we denote $W_{A}$.
+
+In turn, given $m$ selected genes, we describe a population $P$ as a set of $m$ PWMs $W^P_g$, which are the weighted sum of the respective allele PWMs
+\begin{equation}
+    W^P_g = \sum_{A\in\mathcal{A}(g)} f_A^P W_{A}
+\end{equation}
+where $f_A^P$ is the frequency of allele $A$ in population $P$ and $\mathcal{A}(g)$ denotes the set of
+all alleles for $g$.
+
+\begin{algorithm}
+    \SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+    \Input{Selected genes: $G_1\ldots G_m$, Allele frequencies $f_{A_j}^{P_i}$ for $n$ populations $P_1\ldots P_n$ }
+    \Output{Phylogenetic tree $T$ for $P_1\ldots P_n$ with bootstrap values}
+    Preprocessing: Download MSAs from IMGT, $\forall j$ generate $W_{A_j}$
+
+    \For{$P \in P_1\ldots P_n$} {
+        \For{$g \in G_1\ldots G_m$} {
+            $W^{P}_g \leftarrow \sum_{A\in\mathcal{A}(g)} f_A^{P} W_{A}$
+        }
+    }
+    \For{$\mathit{bootstrap} \leftarrow 1$ \KwTo $1000$} {
+        \For{g $\in G_1\ldots G_m$} {
+           $\overline{W^P_g}$ = RandomResamplingColumns($W^P_g$) such that $|\overline{W^P_g}| = |W^P_{g}|$
+        }
+        Calculate distance Matrix DM, performing pairwise Nei distance calculations between populations
+
+        \For{$P_i \in P_1\ldots P_n$} {
+            \For{$P_j \in P_{i+1}\ldots P_n$} {
+                $DM_{ij}$ = Nei($\overline{W^{P_i}_g}$ , $\overline{W^{P_j}_g}$ )
+            }
+        }
+
+        $T_{\mathit{bootstrap}}$ = TreeConstruction($DM$)
+    }
+    Combine bootstrap trees $T_{\mathit{bootstrap}}$ to majority tree $T$ with bootstrap values
+
+\end{algorithm}
+
+
+%From old HLA paper
+%In addition to the locally collected HLA class I data, we acquire allele frequencies for HLA-A and HLA-B from
+%AlleleFrequencies.net [1] using the web site's automated access method for a comprehensive list of population reference codes.
+%We also considered HLA-C frequencies which however is only available for substantially fewer populations;
+%moreover HLA-B and HLA-C are in linkage disequilibrium.
+%We selected populations from continents neighboring the Middle East region if they passed the following quality control criteria:
+%we rule out populations if allele frequencies were reported for different resolutions and yielded contradicting values,
+%i.e, when subtype frequencies would not add up to the frequency of the corresponding supertype. Further we discard populations for which frequencies would not at least add up to 85% per locus. If frequencies would exceed 100% per locus (e.g., due to rounding errors), we normalize the frequencies such that their sum yields 100%.
+%The final selection of populations was conducted manually, taking relevance, uniqueness and population size into account.
+%The phylogenetic tree was calculated by first producing a distance matrix amongst for all selected populations using GENDIST from the PHYLIP package[2], which implements  Nei's standard genetic distance. Subsequently we calculate a Neighbor Joining tree, which is visualized in iToL [3].
