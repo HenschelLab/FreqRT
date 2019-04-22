@@ -1,20 +1,38 @@
-
+\documentclass{article}
+\usepackage{url}
+\usepackage{amsmath}
+%\usepackage[]{algorithm2e}
+\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
 \title{Bootstrapping phylogenies with allele frequencies for few hyperpolymorphic loci}
 
+\begin{document}
 \section{Introduction}
-%From Yurek's email, not sure whether to keep it
+%From Yurek's email, not sure whether to keep it, if so, back up by citations
 There is a historic basis for using HLA gene frequencies in population studies. Mainly, there are six highly polymorphic
 loci to choose between that have different frequencies between individuals and different populations. Class II genes
-appear to be older than the class I genes. Although there is some trans species HLA gene flow between human and apes,
+appear to be older than the class I genes[citation needed]. Although there is some trans-species HLA gene flow between human and apes,
 trans speciation is relatively minor and loci dependent. Thus, most human HLA alleles, although old, have probably
 evolved by genetic drift, selection and mutation with gene flow and admixture contributing to the polymorphisms in the
 MHC region since the split between apes and humans.
 
-Hyperpolymorphic genes such as HLA class I and II are frequently used in anthropological and population genetic studies.
-HLA typing has its roots in serology and thus experimentally, large body of data is available
+
+It is also claimed that HLA is under selection, which raise concerns %% TODO: elaborate
+%argue that it is still feasible for our purposes!
+
+
+Nonetheless, hyperpolymorphic genes such as HLA class I and II are frequently used in anthropological and population genetic studies.
+HLA typing has its roots in serology and thus experimentally, large body of data is available.
 %Yurek "phylogenies from few albeit polymorphic loci"
 Because of their enormous polymorphism and differences between individuals and populations, the phylogenies of HLA genes
-are in theory highly informative for population genetics and anthropology.
+are in theory highly informative for population genetics and anthropology. From an information theoretic perspective
+they are a promising research target, as the amount of all possible outcomes
+However, current methods are based on allele frequencies alone and do not leverage the information theoretic richness during bootstrapping:
+Bootstrapping is based on random sampling with replacement from the original input. To the best of our knowledge,
+all phylogenetic toolkits that are capable of dealing with allele frequencies sample gene-wise.
+I.e, either a gene is sampled and all its allele frequencies (in the case of HLA genes, this can be as high as ...)
+are considered or the gene is discarded in a bootstrap and then none of its allele frequences are taken into
+account. This all-or-nothing approach works well when many loci are considered (e.g. microsatellites)
+but for few genes, it leads to a very coarse grained information entropy resolution.
 
 %The entirety of variation on those genes
 Rich databases describing
@@ -31,7 +49,7 @@ practice in population genetics"
 Nonetheless, a large number of HLA-based phylogeny reconstruction publications have since been  published based on one
 or very few marker genes \cite{}.
 It is worth noting that HLA genes are hyperpolymorphic, and as such many columns in respective MSAs would carry
-informative value for population genetics studies. Most tree reconstruction methods assume locus independence
+information entropy for population genetics studies. Most tree reconstruction methods assume locus independence
 (\cite{Efron1996Nov}), which yet requires a rigorous examination. The problem is not necessarily the low number of
 gene markers as long as they are hyperpolymorphic (i.e., respectively contain multiple polymorphic nucleotide loci)
 and representative enough for a species' genome or population's genepool.
@@ -63,12 +81,7 @@ This in turn consitutes an important prerequisite for the application of classic
 bootstrapping, as resampling from this much larger pool of loci is
 statistically more meaningful.
 
-
-
-
-\section{Methods}
-
-For all genes for which multiple sequence alignments are available, we parse the respective
+\include{methods}
 
 \section{Conclusions}
 
@@ -79,7 +92,8 @@ bootstrapping. Secondly, naturally scientists creating phylogenies should know w
 PLoS ONE need to improve review procedures for population phylogenys built with allele frequencies, in particular those with
 just one or few loci.
 
-%suitable genes
-%In [99]: [(gene, len(ptree.df[ptree.df[gene]>0.95])) for gene in sumcols]
-%Out[99]: [('sum_A', 368), ('sum_B', 352), ('sum_C', 150), ('sum_DPA', 2),
-          %('sum_DPB', 26), ('sum_DQA', 39), ('sum_DQB', 146), ('sum_DRB', 290)]
+\bibliography{ref}
+\bibliographystyle{ieeetr}
+
+
+\end{document}
