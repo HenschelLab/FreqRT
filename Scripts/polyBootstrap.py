@@ -9,7 +9,7 @@ from Bio.Phylo.TreeConstruction import DistanceTreeConstructor, _DistanceMatrix
 from Bio.Phylo import Consensus
 from Bio import Phylo
 
-imgtDir = '/research/gutsybugs/HLA/Data/IMGT/alignments'
+imgtDir = '/research/gutsybugs/HLA/Data/IMGT/alignments' ## adjust this!
 allGenes = ['A', 'B', 'C', 'DMA', 'DMB', 'DOA', 'DOB', 'DPA1', 'DPA2', 'DPB1',
             'DPB2', 'DQA1', 'DQB1', 'DRA', 'DRB1', 'DRB3', 'DRB4', 'E', 'F', 'G', 'H',
             'HFE', 'J', 'K', 'L', 'MICA', 'MICB', 'P', 'T', 'TAP1', 'TAP2', 'V', 'W', 'Y']
