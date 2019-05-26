@@ -20,34 +20,35 @@ mask = df['Sample ID'].isin(availableSamples)
 df = df.loc[mask]  ## power of pandas, loving it!!
 """
 http://www.internationalgenome.org/faq/which-populations-are-part-your-study
-Counter({('AFR', 'ACB'): 98,
-         ('AFR', 'ASW'): 68,
-         ('AFR', 'ESN'): 111,
-         ('AFR', 'GWD'): 120,
-         ('AFR', 'LWK'): 106,
-         ('AFR', 'MSL'): 98,
-         ('AFR', 'YRI'): 111,
-         ('AMR', 'CLM'): 105,
-         ('AMR', 'MXL'): 70,
-         ('AMR', 'PEL'): 91,
-         ('AMR', 'PUR'): 107,
-         ('EAS', 'CDX'): 108,
-         ('EAS', 'CHB'): 108,
-         ('EAS', 'CHS'): 112,
-         ('EAS', 'JPT'): 105,
-         ('EAS', 'KHV'): 103,
-         ('EUR', 'CEU'): 102,
-         ('EUR', 'FIN'): 105,
-         ('EUR', 'GBR'): 102,
-         ('EUR', 'IBS'): 108,
-         ('EUR', 'TSI'): 112,
-         ('SAS', 'BEB'): 103,
-         ('SAS', 'GIH'): 109,
-         ('SAS', 'ITU'): 112,
-         ('SAS', 'PJL'): 108,
-         ('SAS', 'STU'): 111})"""
+         Counter({('AFR', 'ACB'): 96,
+         ('AFR', 'ASW'): 59,
+         ('AFR', 'ESN'): 96,
+         ('AFR', 'GWD'): 112,
+         ('AFR', 'LWK'): 98,
+         ('AFR', 'MSL'): 85,
+         ('AFR', 'YRI'): 108,
+         ('AMR', 'CLM'): 94,
+         ('AMR', 'MXL'): 64,
+         ('AMR', 'PEL'): 85,
+         ('AMR', 'PUR'): 104,
+         ('EAS', 'CDX'): 93,
+         ('EAS', 'CHB'): 103,
+         ('EAS', 'CHS'): 105,
+         ('EAS', 'JPT'): 104,
+         ('EAS', 'KHV'): 99,
+         ('EUR', 'CEU'): 99,
+         ('EUR', 'FIN'): 99,
+         ('EUR', 'GBR'): 91,
+         ('EUR', 'IBS'): 107,
+         ('EUR', 'TSI'): 107,
+         ('SAS', 'BEB'): 86,
+         ('SAS', 'GIH'): 102,
+         ('SAS', 'ITU'): 102,
+         ('SAS', 'PJL'): 96,
+         ('SAS', 'STU'): 102})
+         """
 
-def makePop(pop, df, vcfbased=False):
+def makePop(pop, df, afbased=True):
     df1 = df[df.Population == pop]
     df2 = df1.sample(n=popSize, random_state=1)
     ##memorize df2['Sample ID']
@@ -58,17 +59,18 @@ def makePop(pop, df, vcfbased=False):
         pdict[gene] = {f'{gene}*{k}': v/total for k,v in tmpdict.items()}
     population = Population(pdict, genesData, pop)
     population.sampleIDs = list(df2['Sample ID'])
-    if vcfbased:
+    if not afbased:
         population.readVCF(genesShort)
     return population
 
-highConfidenceTreeSelection = 'YRI FIN IBS PJL CLM JPT'.split()
-popSize = 60 
+highConfidenceTreeSelection = 'YRI GBR IBS CEU PJL PUR ACB CLM GIH PEL JPT'.split()
+popCounts = Counter(df.Population)
+popSize = min([popCounts[pop] for pop in highConfidenceTreeSelection])
+#popSize = 90 
 ## jackknifing: compose populations randomly, equal size
 with open('../Data/hlaABPoly.pcl', 'rb') as f: 
     genesData = pickle.load(f)
-#p = makePop('YRI', df)
-#p.readVCF(['A', 'C'])
 
-ps = PopulationSet([makePop(pop, df, vcfbased=True) for pop in highConfidenceTreeSelection])
-ps.bootstrap(bootstraps=100, basename='vcfbased', treebuilder='upgma', outgroup='YRI')
+ps = PopulationSet([makePop(pop, df, afbased=False) for pop in highConfidenceTreeSelection])
+ps.bootstrap(bootstraps=100, basename=f'afbased_AB_highConf1_{popSize}', treebuilder='upgma', outgroup='YRI')
+ps.bootstrap(bootstraps=100, basename=f'vcfbased_AB_highConf1_{popSize}', treebuilder='upgma', outgroup='YRI', afbased=False)

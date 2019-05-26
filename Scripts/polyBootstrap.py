@@ -48,18 +48,16 @@ class Gene:
                 self.reference = id
             seqs[id] += ''.join(fields[1:])
 
-        #pdb.set_trace()
         try:
             assert len(set(map(len, seqs.values()))) == 1 ## all seqs have to have equal length!!!
         except AssertionError:
-            #pdb.set_trace()
             print ("Warning! Sequences have different lengths")
         ## Beware: the reference sequence still contains |
         self.spliceSites = np.cumsum(list(map(len, seqs[self.reference].split('|'))))#[idx for idx, pos in enumerate(seqs[self.reference]) if pos=='|']
         self.refseq0 = seqs[self.reference] ## hopefully this is always a copy, not a pointer
         self.refseq = self.refseq0.replace('|','')
         # probably not efficient, but only happens once
-        #pdb.set_trace()
+        
         ## taking care of the ref seq, ie. formatting it like the rest (. means consensus)
         seqs[self.reference] = ''.join(['.' if nt=='.' else '-' for nt in self.refseq])
         self.df = pd.DataFrame.from_records([rowMgmt(key, seqs[key]) for key in sorted(seqs.keys())])
@@ -147,15 +145,15 @@ class Population:
                     pwm[:, idx] += freq * a
         ## Make a nice dataframe out of it, good for merging, viewing ...
         self.pwm = pd.DataFrame(pwm.T, index=self.allpolySites, columns=bases)
-    def bootstrap(self, selectedLoci):
+    def bootstrap(self, selectedLoci, afbased=True):
+        pwm = self.pwm if afbased else self.pwmVCF
         if not "genes" in vars(self):
             print ("Warning: needs gene data for variable loci, will probably fail!!!")
         def getProbDist(locus):
-            if locus in self.pwm.index:
-                return self.pwm.loc[[locus]].iloc[0] ## this required rewriting since locus became a tuple
+            if locus in pwm.index:
+                return pwm.loc[[locus]].iloc[0] ## this required rewriting since locus became a tuple
             ## slightly redundant code, see makePWM
             ## locus not variable in this population
-            #import pdb; pdb.set_trace()
             refNt = self.genes[locus[0]].refseq[locus[1]]
             refNtpos = bases.index(refNt)
             a = np.zeros(5)
@@ -184,29 +182,32 @@ class Population:
                 refNtpos = bases.index(r.ALT)
                 row[refNtpos+1] = alleleCount['1']/total
                 pwm.append(row)
-        self.pwm = pd.DataFrame(pwm, columns=['index']+bases)
-        self.pwm.set_index('index', inplace=True)
-        self.allpolySites = self.pwm.index.to_list() ## possibly overwriting, compatible with phylo construction
+        self.pwmVCF = pd.DataFrame(pwm, columns=['index']+bases)
+        self.pwmVCF.set_index('index', inplace=True)
+        self.allpolySitesVCF = self.pwmVCF.index.to_list() ## no overwriting, compatible with phylo construction
     
 class PopulationSet:
     def __init__(self, populations):
         self.populations = populations
         self.popnames = [pop.name for pop in self.populations]
-    def bootstrap(self, basename='majorityTree', treebuilder='nj', bootstraps=1000, outgroup=None):
+    def bootstrap(self, afbased=True, basename='majorityTree', treebuilder='nj', bootstraps=1000, outgroup=None):
         """treebuilder could be nj/upgma, outgroup: a population name or 'midpoint'"""
         ## allLoci: all loci that are variable in at least one population
+        allpolySites, pwm = {True:  ['allpolySites', 'pwm'],
+                             False: ['allpolySitesVCF', 'pwmVCF'],}[afbased]
         allLoci = set()
         for pop in self.populations:
-            allLoci = allLoci.union(pop.allpolySites)
+            allLoci = allLoci.union(getattr(pop, allpolySites))
         allLoci = list(allLoci) ## sort it? Reduce to independent sites (www.pnas.org/content/93/23/13429, run LD?)
         
         sites = len(allLoci)
         trees = []
-        for bootstrap in range(bootstraps): ## possibly parallelize
-            print("Bootstrap: %s" % bootstrap)
+        print ("Bootstrapping, rounds:", end=' ')
+        for bootstrap in range(bootstraps): ## see also parallelized version
+            print(bootstrap, end=' ')
             selectedLoci0 = np.random.choice(range(len(allLoci)), sites, replace=True)
             selectedLoci = [allLoci[l] for l in selectedLoci0]
-            df = pd.DataFrame([pop.bootstrap(selectedLoci) for pop in self.populations], index=self.popnames)
+            df = pd.DataFrame([pop.bootstrap(selectedLoci, afbased) for pop in self.populations], index=self.popnames)
             #import pdb; pdb.set_trace()
             dmNei = neiDF(df, [5]*(sites-1))
             ## annoying conversion, BioPython couldnt be just more compatible with scipy/pdist?

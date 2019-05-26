@@ -6,6 +6,13 @@
 \title{Bootstrapping phylogenies with allele frequencies for few hyperpolymorphic loci}
 
 \begin{document}
+
+\begin{abstract}
+    We here describe a method to generate phylognies from few yet hyperpolymorphic genes. This is useful for which large collections of allel
+    probabilities for all encountered allele types according 
+    to observed allele freqs
+\end{abstract}
+
 \section{Introduction}
 
 \begin{figure}
@@ -48,13 +55,13 @@ Unfortunately, the low number of genes as biomarkers in combination with phyloge
 loci for bootstrapping have led to numerous works with incorrect bootstrapping.
 They providing false confidence into produced phylogenetic trees. The ramifications of such practices have caused
 severe controversies:
-In 2002, Piazza, Risch and Cavalli-Sforza have already criticized the works of Hajjej/Arnaiz-Villena and noted that
+In 2002, Piazza, Risch and Cavalli-Sforza \cite{Risch2002Jan} have already criticized the works of Hajjej/Arnaiz-Villena and noted that
 phylogenetic analysis  "Using results from the analysis of a single marker, particularly one likely to
 have undergone selection, for the purpose of reconstructing genealogies is unreliable and unacceptable
 practice in population genetics"
 
 Nonetheless, a large number of HLA-based phylogeny reconstruction publications have since been  published based on one
-or very few marker genes \cite{}.
+or very few marker genes \cite{Hajjej2018Mar,arnaiz2001hla,Arnaiz-Villena2017Jan, Zha}.
 It is worth noting that HLA genes are hyperpolymorphic, and as such many columns in respective MSAs would carry
 information entropy for population genetics studies. Most tree reconstruction methods assume locus independence
 (\cite{Efron1996Nov}), which yet requires a rigorous examination. The problem is not necessarily the low number of
