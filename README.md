@@ -1,7 +1,8 @@
 # FreqRT
 
-(pronounce fr&#0230;kkert, danish for cheeky person, also affectionate)
-The goal is to provide a method that allows to draw phylogenetic trees from few but hyperpolymorphic genes, while doing reliable bootstrapping.
+([fr&#0230;kkert] danish for cheeky person, also affectionate)
+
+The goal is to provide a method that allows to draw phylogenetic trees from allele frequencies of few but hyperpolymorphic genes, while doing reliable bootstrapping.
 For example genes belonging to the MHC have many variable loci, leading to many different alleles.
 Conventional methods for however are not suitable for low numbers of marker
 genes (Phylip, DISPAN, check GenPop), since they perform bootstrapping with gene loci as units.

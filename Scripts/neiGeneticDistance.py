@@ -2,7 +2,6 @@ import numpy as np
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 
-
 def dotsum(X,Y):
     return sum(np.dot(x,y) for x, y in zip(X,Y))
 

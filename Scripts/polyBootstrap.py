@@ -8,12 +8,16 @@ from neiGeneticDistance import *
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor, _DistanceMatrix
 from Bio.Phylo import Consensus
 from Bio import Phylo
+import io
 
 imgtDir = '/research/gutsybugs/HLA/Data/IMGT/alignments' ## adjust this!
+vcfDir = '../Data/'
 allGenes = ['A', 'B', 'C', 'DMA', 'DMB', 'DOA', 'DOB', 'DPA1', 'DPA2', 'DPB1',
             'DPB2', 'DQA1', 'DQB1', 'DRA', 'DRB1', 'DRB3', 'DRB4', 'E', 'F', 'G', 'H',
             'HFE', 'J', 'K', 'L', 'MICA', 'MICB', 'P', 'T', 'TAP1', 'TAP2', 'V', 'W', 'Y']
 bases = list('ACGT.')
+vcfdtypes = {'#CHROM': str, 'POS': int, 'ID': str, 'REF': str, 
+             'ALT': str, 'QUAL': str, 'FILTER': str, 'INFO': str}
 def rowMgmt(key, seq):
     return tuple([':'.join(key), key[0]] + list(seq.replace('|', '')))
 
@@ -99,7 +103,7 @@ class Poly:
     #def entropy(self):
 
 class Population:
-    def __init__(self, alleleFreqs, genes, name='Pop', run=True): ## options: 'core exons', 'nonsilent', 'all'
+    def __init__(self, alleleFreqs, genes, name='Pop', run=True, keepData=True): ## options: 'core exons', 'nonsilent', 'all'
         def normalized(afdict, gene):
             ## first, filter out those, we don't have data for, shouldn't happen (that much)
             d = {k:v for k,v in afdict.items() if k in genes[gene].polymorphSites} ## TODO: give warning
@@ -111,6 +115,8 @@ class Population:
         if run:
             self.getAllPolySites(genes)
             self.makePWM(genes)
+        if keepData: ## this could be large if population is pickled. Needed in bootstrap
+            self.genes = genes
 
     def getAllPolySites(self, genes):
         allSites = set()
@@ -142,28 +148,58 @@ class Population:
         ## Make a nice dataframe out of it, good for merging, viewing ...
         self.pwm = pd.DataFrame(pwm.T, index=self.allpolySites, columns=bases)
     def bootstrap(self, selectedLoci):
+        if not "genes" in vars(self):
+            print ("Warning: needs gene data for variable loci, will probably fail!!!")
         def getProbDist(locus):
             if locus in self.pwm.index:
                 return self.pwm.loc[[locus]].iloc[0] ## this required rewriting since locus became a tuple
             ## slightly redundant code, see makePWM
-            refNt = genes.refseq[locus]
+            ## locus not variable in this population
+            #import pdb; pdb.set_trace()
+            refNt = self.genes[locus[0]].refseq[locus[1]]
             refNtpos = bases.index(refNt)
             a = np.zeros(5)
             a[refNtpos] = 1.
             return a
         return np.hstack([getProbDist(locus) for locus in selectedLoci]) ##
 
+    def readVCF(self, genesShort):
+        ## TODO: fix for all genes
+        pwm = []
+        for gene in genesShort: ## FIX:
+            with open(f'{vcfDir}chr6_1000g_HLA_{gene}.vcf', 'r') as f:
+                lines = [l for l in f if not l.startswith('##')] ## everythin in memory :-(
+            vcf = pd.read_csv(io.StringIO(''.join(lines)), dtype=vcfdtypes, \
+                            sep='\t').rename(columns={'#CHROM': 'CHROM'})
+            vcf = vcf[['POS','REF','ALT']+self.sampleIDs] ## just select pop samples # like vcf subset  
+            snvMask = (vcf['REF'].str.len() == 1) & (vcf['ALT'].str.len() == 1) # only biallelic SNVs
+            self.vcf = vcf.loc[snvMask]
+
+            for i, r in self.vcf.iterrows():
+                row = [(gene, r.POS), 0,0,0,0,0]
+                alleleCount = Counter(''.join(list(r)[3:]))
+                total = alleleCount['0'] + alleleCount['1']
+                refNtpos = bases.index(r.REF)
+                row[refNtpos+1] = alleleCount['0']/total
+                refNtpos = bases.index(r.ALT)
+                row[refNtpos+1] = alleleCount['1']/total
+                pwm.append(row)
+        self.pwm = pd.DataFrame(pwm, columns=['index']+bases)
+        self.pwm.set_index('index', inplace=True)
+        self.allpolySites = self.pwm.index.to_list() ## possibly overwriting, compatible with phylo construction
+    
 class PopulationSet:
     def __init__(self, populations):
         self.populations = populations
         self.popnames = [pop.name for pop in self.populations]
     def bootstrap(self, basename='majorityTree', treebuilder='nj', bootstraps=1000, outgroup=None):
         """treebuilder could be nj/upgma, outgroup: a population name or 'midpoint'"""
+        ## allLoci: all loci that are variable in at least one population
         allLoci = set()
         for pop in self.populations:
             allLoci = allLoci.union(pop.allpolySites)
         allLoci = list(allLoci) ## sort it? Reduce to independent sites (www.pnas.org/content/93/23/13429, run LD?)
-
+        
         sites = len(allLoci)
         trees = []
         for bootstrap in range(bootstraps): ## possibly parallelize
@@ -171,6 +207,7 @@ class PopulationSet:
             selectedLoci0 = np.random.choice(range(len(allLoci)), sites, replace=True)
             selectedLoci = [allLoci[l] for l in selectedLoci0]
             df = pd.DataFrame([pop.bootstrap(selectedLoci) for pop in self.populations], index=self.popnames)
+            #import pdb; pdb.set_trace()
             dmNei = neiDF(df, [5]*(sites-1))
             ## annoying conversion, BioPython couldnt be just more compatible with scipy/pdist?
             dmTriangular = [list(dmNei[i, :(i + 1)]) for i in range(len(dmNei))]

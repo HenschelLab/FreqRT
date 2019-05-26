@@ -46,6 +46,7 @@ print("Wrote %s" % filename)
 
 
 '''
+#Deprecated code, intended for single run
 for popIdx in range(len(ptree.df)):
     row = ptree.df.iloc[popIdx]
     if type(row.PopName) != str or len(row.PopName)<2: continue
