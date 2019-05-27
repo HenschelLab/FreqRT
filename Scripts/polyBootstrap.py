@@ -10,8 +10,11 @@ from Bio.Phylo import Consensus
 from Bio import Phylo
 import io
 
-imgtDir = '/research/gutsybugs/HLA/Data/IMGT/alignments' ## adjust this!
+#imgtDir = '/research/gutsybugs/HLA/Data/IMGT/alignments' ## adjust this!
+imgtDir = '/Users/ahenschel/Github/FreqRT/Data/IMGT/alignments'
 vcfDir = '../Data/'
+resultDir = '../Results/Trees'
+
 allGenes = ['A', 'B', 'C', 'DMA', 'DMB', 'DOA', 'DOB', 'DPA1', 'DPA2', 'DPB1',
             'DPB2', 'DQA1', 'DQB1', 'DRA', 'DRB1', 'DRB3', 'DRB4', 'E', 'F', 'G', 'H',
             'HFE', 'J', 'K', 'L', 'MICA', 'MICB', 'P', 'T', 'TAP1', 'TAP2', 'V', 'W', 'Y']
@@ -221,10 +224,13 @@ class PopulationSet:
             elif not outgroup is None:
                 tree.root_with_outgroup({'name': outgroup})
             trees.append(tree) ## use nj!
+        ## debug info:
+        print(f'selectedLoci: {selectedLoci[:30]}')
         ## see https://biopython.org/wiki/Phylo, turned out to be more suitable than dendropy/sumtrees
         self.majorityTree = Consensus.majority_consensus(trees) ## also consider strict_consensus and adam_consensus (but they don't have bootstrap support values)
-        Phylo.write(self.majorityTree, '../Data/%s_%s_%s_%s.nwk' %(basename, bootstraps, \
-                                                                   treebuilder, len(self.populations)), format='newick')
+        treefile = '%s/%s_%s_%s_%s.nwk' %(resultDir, basename, bootstraps,treebuilder, len(self.populations))
+        Phylo.write(self.majorityTree, treefile, format='newick')
+        print(f'wrote {treefile}')
         Phylo.draw_ascii(self.majorityTree)
 
         #Phylo.draw(self.majorityTree)

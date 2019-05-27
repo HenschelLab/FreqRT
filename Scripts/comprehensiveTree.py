@@ -25,19 +25,23 @@ for gene in selectedGenes:
     if not gene in genes:
         genes[gene] = Gene(gene=gene)
 
-genes['DQB1'] = Gene(gene='DQB1')
-
 ptree = PopulationTree()
 ptree.fix()
-ptree.findPopsWithData(selectedGenes, minPopSize=minPopSize)
 
-pops = [Population(pdict, genes, pname) for (pname, pdict) in ptree.makeAFdicts(selectedGenes)] ## CHANGE!!!
+for nrGenes in range(1,7):
+    print(nrGenes)
+    print(ptree.exploreGoodCombinations(nrGenes=nrGenes))
 
-ps = PopulationSet(pops)
-filename = "../Data/pops_%s_min%s.pcl" % ("-".join(selectedGenes), minPopSize)
-with open(filename, "wb") as w:
-    pickle.dump(ps.populations,w)
-print("Wrote %s" % filename)
+if False:
+    ptree.findPopsWithData(selectedGenes, minPopSize=minPopSize)
+
+    pops = [Population(pdict, genes, pname) for (pname, pdict) in ptree.makeAFdicts(selectedGenes)] ## CHANGE!!!
+
+    ps = PopulationSet(pops)
+    filename = "../Data/pops_%s_min%s.pcl" % ("-".join(selectedGenes), minPopSize)
+    with open(filename, "wb") as w:
+        pickle.dump(ps.populations,w)
+    print("Wrote %s" % filename)
 
 #Often to slow to run on a single machine. dump population data as pickle
 #see parallelBootstrap.py, which is started by the bsub script runAllBootstraps.sh

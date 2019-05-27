@@ -118,14 +118,14 @@ class PopulationTree:
             self.alleleFreqDicts  = [AlleleFreqDict(af, pop) for af, pop in zip(afs, self.popList)]
 
             # merge with our data (possibly other tables as well)
-            beduinData = pd.read_csv("../Data/uae_updatedAFs.csv", index_col=[0])
+            #beduinData = pd.read_csv("../Data/uae_updatedAFs.csv", index_col=[0])
             #beduinData['PopSize'] = 95
             #beduinData['PopName'] = 'UAE KU'
             #beduinData = bd.drop(bd.columns[1:], axis=1).T  ## Warning, Windows format
             #b25 = pd.read_csv("../Data/beduins25c.csv", index_col=[0])
-            iraqi = pd.read_csv("../Data/iraqiHLA.csv", index_col=[0])
+            #iraqi = pd.read_csv("../Data/iraqiHLA.csv", index_col=[0])
 
-            df = pd.concat([df, iraqi, beduinData], sort=True)
+            #df = pd.concat([df, iraqi, beduinData], sort=True)
             df.fillna(0, inplace=True)
 
             self.df = pd.concat([df, self.popInfo], axis=1)

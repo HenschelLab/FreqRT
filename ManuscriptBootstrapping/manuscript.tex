@@ -3,15 +3,38 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
-\title{Bootstrapping phylogenies with allele frequencies for few hyperpolymorphic loci}
+
 
 \begin{document}
+\title{Bootstrapping phylogenies with allele frequencies for few hyperpolymorphic genes}
+
+
+\author{Aurelie Mawart}
+ %\affiliation[Also at ]{Physics Department, XYZ University.}%Lines break automatically or can be forced with \\
+ \author{Gihan Elsir Ahmed Dawelbait}
+ %\affiliation[Also at ]{Physics Department, XYZ University.}%Lines break automatically or can be forced with \\
+\author{Andreas Henschel}%
+ %\email{Second.Author@institution.edu}
+%\affiliation{%
+% Authors' institution and/or address\\
+% This line break forced with \textbackslash\textbackslash
+
+%\affil[1]{Khalifa Univeristy, Department of Biomedical Engineering}
+%\affil[2]{Khalifa Univeristy, Department of Electrical Engineering and Computer Science}
+
 
 \begin{abstract}
-    We here describe a method to generate phylognies from few yet hyperpolymorphic genes. This is useful for which large collections of allel
+    Confidence in phylogeny branch support is conventionally calculated by bootstrapping, i.e, the perturbation of input data, commonly a multiple sequence alignment, through resampling with replacement. HLA gene frequencies in population studies
+    Conventional phylogeny bootstrapping requires therefore a reasonable number of 
+    We here describe a method to generate phylognies from few yet hyperpolymorphic genes. 
+    This is useful for population descriptors that use single or few genes collections of alleles
     probabilities for all encountered allele types according 
     to observed allele freqs
 \end{abstract}
+
+%\keywords{Suggested keywords}%Use showkeys class option if keyword
+                              %display desired
+\maketitle
 
 \section{Introduction}
 
@@ -22,6 +45,8 @@
 \end{figure}
 
 %From Yurek's email, not sure whether to keep it, if so, back up by citations
+Polymorphic genes of the MH complex have properties not unlike other genetic markers suitable for 
+population studies, such as 
 There is a historic basis for using HLA gene frequencies in population studies. Mainly, there are six highly polymorphic
 loci to choose between that have different frequencies between individuals and different populations. Class II genes
 appear to be older than the class I genes[citation needed]. Although there is some trans-species HLA gene flow between human and apes,
@@ -61,7 +86,7 @@ have undergone selection, for the purpose of reconstructing genealogies is unrel
 practice in population genetics"
 
 Nonetheless, a large number of HLA-based phylogeny reconstruction publications have since been  published based on one
-or very few marker genes \cite{Hajjej2018Mar,arnaiz2001hla,Arnaiz-Villena2017Jan, Zha}.
+or very few marker genes \cite{Hajjej2018Mar,arnaiz2001hla,ArnaizVillena2017Jan,Zhang2012Jun}.
 It is worth noting that HLA genes are hyperpolymorphic, and as such many columns in respective MSAs would carry
 information entropy for population genetics studies. Most tree reconstruction methods assume locus independence
 (\cite{Efron1996Nov}), which yet requires a rigorous examination. The problem is not necessarily the low number of
@@ -74,7 +99,7 @@ If only allele frequencies from a single gene are used, conventional bootstrappi
 draws repeatedly from only a single locus. Trivially, this single locus is in agreement with itself, and the tools
 report 100\% branch support for all clades in the tree.
 False confidence
-Respected journals have failed to critically review this misuse of bootsrapping \cite{Villena2017Jan,Hajjej2018Mar}.
+Respected journals have failed to critically review this misuse of bootsrapping \cite{ArnaizVillena2017Jan,Hajjej2018Mar}.
 For two genes A and B, resampling leads the combinations AA (25\%), AB (50\%) and BB (25\%). If both A and B agree on the branch split
 100\% branch split support will be reported by teh software. branch split is
 supported by both A and B, 100\
@@ -99,7 +124,12 @@ statistically more meaningful.
 
 \section{Conclusions}
 
-The wrong practice of bootstrapping seems to be relatively common place in the HLA community.
+To the best of our knowledge, we produced here the most comprehensive phylogenetic trees with respect to number of populations.
+We have done so by carefully evaluating the confidence of each branch deploying a novel method, FreqRT.
+FreqRT can
+
+
+The wrong practice of bootstrapping for allele frequency datasets with few genes seems to be relatively common place in the HLA community.
 We would hereby like to raise awareness during three time points of the publication cycle. First, software tools like
 Phylip, DISPAN etc ought to generate warnings, when the number of provided loci is too low to subject allele frequencies to
 bootstrapping. Secondly, naturally scientists creating phylogenies should know what they are doing. Finally, journals like

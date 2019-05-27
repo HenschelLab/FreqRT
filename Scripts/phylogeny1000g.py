@@ -10,8 +10,8 @@ import subprocess
 df = pd.read_csv('../Data/20181129_HLA_types_full_1000_Genomes_Project_panelA.txt', sep='\t').replace('None', pd.np.nan)  
 genes = ['HLA-A 1', 'HLA-A 2', 'HLA-B 1', 'HLA-B 2', 'HLA-C 1', 'HLA-C 2', 'HLA-DQB1 1', 'HLA-DQB1 2', 'HLA-DRB1 1', 'HLA-DRB1 2']
 #genes = 'A B C DQB1 DRB1'.split()[:3] 
-cols = ['Region', 'Population', 'Sample ID'] + genes[:4]
-genesShort = [g.split()[0].split('-')[-1] for g in genes[:4:2]]  
+cols = ['Region', 'Population', 'Sample ID'] + genes[:6]
+genesShort = [g.split()[0].split('-')[-1] for g in genes[:6:2]]  
 df = df[cols].dropna(how='any')
 ## reducing the rows to those samples for which we actually have vcf data
 vcfdir = '../Data'
@@ -50,6 +50,7 @@ http://www.internationalgenome.org/faq/which-populations-are-part-your-study
 
 def makePop(pop, df, afbased=True):
     df1 = df[df.Population == pop]
+    ## jackknifing: compose populations randomly, equal size
     df2 = df1.sample(n=popSize, random_state=1)
     ##memorize df2['Sample ID']
     pdict = {}
@@ -63,14 +64,19 @@ def makePop(pop, df, afbased=True):
         population.readVCF(genesShort)
     return population
 
-highConfidenceTreeSelection = 'YRI GBR IBS CEU PJL PUR ACB CLM GIH PEL JPT'.split()
+popSelection = 'YRI GBR IBS CEU PJL PUR ACB CLM GIH PEL JPT'.split()
 popCounts = Counter(df.Population)
-popSize = min([popCounts[pop] for pop in highConfidenceTreeSelection])
+popSize = min([popCounts[pop] for pop in popSelection])
 #popSize = 90 
-## jackknifing: compose populations randomly, equal size
-with open('../Data/hlaABPoly.pcl', 'rb') as f: 
-    genesData = pickle.load(f)
 
-ps = PopulationSet([makePop(pop, df, afbased=False) for pop in highConfidenceTreeSelection])
-ps.bootstrap(bootstraps=100, basename=f'afbased_AB_highConf1_{popSize}', treebuilder='upgma', outgroup='YRI')
-ps.bootstrap(bootstraps=100, basename=f'vcfbased_AB_highConf1_{popSize}', treebuilder='upgma', outgroup='YRI', afbased=False)
+with open('../Data/hlaABPoly.pcl', 'rb') as f: 
+    genesData = pickle.load(f) ## TODO: precalc other genes!
+for gene in genesShort:
+    if not gene in genesData:
+        genesData[gene] = Gene(gene=gene)
+
+ps = PopulationSet([makePop(pop, df, afbased=False) for pop in popSelection])
+basenameAF  = f'afbased_{"-".join(genesShort)}_highConf1_ps{popSize}_pops{len(popSelection)}'
+basenameVCF = f'vcfbased_{"-".join(genesShort)}_highConf1_ps{popSize}_pops{len(popSelection)}'
+ps.bootstrap(bootstraps=100, basename=basenameAF, treebuilder='nj', outgroup='YRI')
+ps.bootstrap(bootstraps=100, basename=basenameVCF, treebuilder='nj', outgroup='YRI', afbased=False)
