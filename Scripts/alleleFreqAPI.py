@@ -168,6 +168,7 @@ class PopulationTree:
     def findPopsWithData(self, genes, thresh=.95, minPopSize=None):
         d = self.df
         genes = ['sum_%s'%gene for gene in genes]
+
         if len(genes)==2:
             g1,g2 = genes
             self.d1=d[(d[g1] > thresh) & (d[g2] > thresh)]
@@ -178,6 +179,13 @@ class PopulationTree:
         elif len(genes) == 4:
             g1,g2,g3,g4 = genes
             self.d1 =d[(d[g1] > thresh) & (d[g2] > thresh) & (d[g3] > thresh) & (d[g4] > thresh)]
+        elif len(genes) == 5:
+            g1,g2,g3,g4,g5 = genes
+            self.d1 =d[(d[g1] > thresh) & (d[g2] > thresh) & (d[g3] > thresh) & (d[g4] > thresh) & (d[g5] > thresh)]
+        elif len(genes) == 6:
+            g1,g2,g3,g4,g5,g6 = genes
+            self.d1 =d[(d[g1] > thresh) & (d[g2] > thresh) & (d[g3] > thresh) & (d[g4] > thresh) & (d[g5] > thresh) & (d[g6] > thresh)]
+        
         if minPopSize:
             self.d1 = self.d1[self.d1.PopSize >= minPopSize]
 

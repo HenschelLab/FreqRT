@@ -9,39 +9,38 @@ compatible with polyBootstrap
 
 """
 
-
 from polyBootstrap import Gene, Poly, Population, PopulationSet
 from alleleFreqAPI import PopulationTree
 import pandas as pd
 import pickle
 import numpy as np
-
+allGenes = ['A', 'B', 'C', 'DPA1', 'DPB1', 'DQA1', 'DQB1', 'DRB1']
 ## TODO: read this from command line args
-selectedGenes = ['A', 'B', 'DQB1']
-minPopSize = 95 # so to include UAE
-
-with open('../Data/hlaABPoly.pcl', 'rb') as f: genes = pickle.load(f) ## TODO: precalc other genes!
-for gene in selectedGenes:
+with open('../Data/hlaAllPoly.pcl', 'rb') as f: genes = pickle.load(f) ## TODO: precalc other genes!
+for gene in allGenes:
     if not gene in genes:
         genes[gene] = Gene(gene=gene)
 
 ptree = PopulationTree()
 ptree.fix()
 
-for nrGenes in range(1,7):
+stripsum = lambda x: [e[4:] for e in x]
+#selectedGenes = ['A', 'B', 'DRB1', 'DQB1']
+minPopSize = 50 
+for nrGenes in range(2,7):
     print(nrGenes)
-    print(ptree.exploreGoodCombinations(nrGenes=nrGenes))
+    ps = ptree.exploreGoodCombinations(nrGenes=nrGenes)[-3:]
+    geneCombinations = [stripsum(com[1:]) for com in ps] 
 
-if False:
-    ptree.findPopsWithData(selectedGenes, minPopSize=minPopSize)
+    for selectedGenes in geneCombinations:
+        ptree.findPopsWithData(selectedGenes, minPopSize=minPopSize)
+        pops = [Population(pdict, genes, pname) for (pname, pdict) in ptree.makeAFdicts(selectedGenes)] ## CHANGE!!!
 
-    pops = [Population(pdict, genes, pname) for (pname, pdict) in ptree.makeAFdicts(selectedGenes)] ## CHANGE!!!
-
-    ps = PopulationSet(pops)
-    filename = "../Data/pops_%s_min%s.pcl" % ("-".join(selectedGenes), minPopSize)
-    with open(filename, "wb") as w:
-        pickle.dump(ps.populations,w)
-    print("Wrote %s" % filename)
+        ps = PopulationSet(pops)
+        filename = "../Data/pops_%s_min%s.pcl" % ("-".join(selectedGenes), minPopSize)
+        with open(filename, "wb") as w:
+            pickle.dump( ps.populations,w)
+        print("Wrote %s" % filename)
 
 #Often to slow to run on a single machine. dump population data as pickle
 #see parallelBootstrap.py, which is started by the bsub script runAllBootstraps.sh
