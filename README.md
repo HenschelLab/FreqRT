@@ -22,3 +22,12 @@ for all clades in the tree, which leads to false confidence.
 Sample usage:
 
 look at comprehensiveTree.py
+
+## Requirements
+Python >=3.6, 
+Various python libraries
+* numpy
+* BioPython
+* pandas
+* dendropy
+* networkx
