@@ -38,4 +38,3 @@ majorityTree = Consensus.majority_consensus(trees)
 Phylo.write(majorityTree, '../Data/%s.nwk' % treebase, format='newick')
 
 Phylo.draw_ascii(majorityTree)
-

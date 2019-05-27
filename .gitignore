@@ -7,5 +7,10 @@
 *.blg
 *.synctex.gz
 README
+*.nwk
 Scripts/__pycache__/*.cpython-36.pyc
 Scripts/__pycache__/*.cpython-37.pyc
+Data/uae_updatedAFs.csv
+Data/popListAFnet.pcl
+Data/iraqiHLA.csv
+Results/Trees/*
