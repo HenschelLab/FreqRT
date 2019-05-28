@@ -17,5 +17,8 @@ for pcl in glob.glob('/research/btc_bioinformatic/operations/HLA/FreqRT/Data/Pop
     with open(f'bsub_{basename}.sh' , 'w') as w:
         w.write(bsub % (basename, basename, basename))
         w.write(cmd % (pcl, basename))
-        subprocess.call(f'bsub < bsub_{basename}.sh', shell=True)
+        #subprocess.call(f'bsub < bsub_{basename}.sh', shell=True)
         time.sleep(0.5)
+    print(f'bsub < bsub_{basename}.sh')
+        
+
