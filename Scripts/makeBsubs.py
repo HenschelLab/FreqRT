@@ -15,4 +15,5 @@ for pcl in glob.glob('/research/btc_bioinformatic/operations/HLA/FreqRT/Data/Pop
     with open(f'bsub_{basename}.sh' , 'rb') as w:
         w.write(bsub % (basename, basename))
         w.write(cmd % (pcl, basename))
+    print(f'bsub < bsub_{basename}.sh')
         
