@@ -20,7 +20,8 @@ They don't provide bootstrap support values, though.
 #source activate bio3
 """
 
-datadir = "/research/gutsybugs/HLA/Data/Trees"
+datadir = "/research/btc_bioinformatic/operations/HLA/FreqRT/Data"
+
 
 treebase = "maj_ABC_1_nj_92"
 if len(sys.path)>2:
