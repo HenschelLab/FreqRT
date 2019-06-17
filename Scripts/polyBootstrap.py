@@ -118,7 +118,12 @@ class Population:
             self.makePWM(genes)
         if keepData: ## this could be large if population is pickled. Needed in bootstrap
             self.genes = genes
-
+    def afRow(self):
+        s = {}
+        for afd in self.alleleFreqs.values(): 
+            s.update(afd) 
+        return s 
+        
     def getAllPolySites(self, genes):
         allSites = set()
         for gene, geneAFs in self.alleleFreqs.items():
@@ -193,11 +198,21 @@ class PopulationSet:
     def __init__(self, populations):
         self.populations = populations
         self.popnames = [pop.name for pop in self.populations]
-    def bootstrap(self, afbased=True, basename='majorityTree', treebuilder='nj', bootstraps=1000, outgroup=None):
+    def makeAFtable(self):
+        ## for use with alleleFreqAPI's PopulationTree (phylip)
+        df = pd.DataFrame([pop.afRow() for pop in self.populations])
+        cols = sorted(df.columns.values)
+        df.fillna(0, inplace=True)
+        df.columns = cols
+        df['PopName'] = self.popnames
+        df.columns = sorted(df.columns.values)
+        return df
+            
+    def bootstrap(self, afbased=True, basename='majorityTree', treebuilder='nj', bootstraps=1000, outgroup=None, useAllLoci=False):
         """treebuilder could be nj/upgma, outgroup: a population name or 'midpoint'"""
         ## allLoci: all loci that are variable in at least one population
         allpolySites, pwm = {True:  ['allpolySites', 'pwm'],
-                             False: ['allpolySitesVCF', 'pwmVCF'],}[afbased]
+                             False: ['allpolySitesVCF', 'pwmVCF']}[afbased]
         allLoci = set()
         for pop in self.populations:
             allLoci = allLoci.union(getattr(pop, allpolySites))
@@ -208,13 +223,16 @@ class PopulationSet:
         print ("Bootstrapping, rounds:", end=' ')
         for bootstrap in range(bootstraps): ## see also parallelized version
             print(bootstrap, end=' ')
-            selectedLoci0 = np.random.choice(range(len(allLoci)), sites, replace=True)
-            selectedLoci = [allLoci[l] for l in selectedLoci0]
+            if useAllLoci:
+                selectedLoci = allLoci
+            else:
+                selectedLoci0 = np.random.choice(range(len(allLoci)), sites, replace=True)
+                selectedLoci = [allLoci[l] for l in selectedLoci0]
             df = pd.DataFrame([pop.bootstrap(selectedLoci, afbased) for pop in self.populations], index=self.popnames)
             #import pdb; pdb.set_trace()
-            dmNei = neiDF(df, [5]*(sites-1))
+            self.dmNei = neiDF(df, [5]*(sites-1))
             ## annoying conversion, BioPython couldnt be just more compatible with scipy/pdist?
-            dmTriangular = [list(dmNei[i, :(i + 1)]) for i in range(len(dmNei))]
+            dmTriangular = [list(self.dmNei[i, :(i + 1)]) for i in range(len(self.dmNei))]
 
             m = _DistanceMatrix(self.popnames, dmTriangular)
             constructor = DistanceTreeConstructor() # could've passed treebuilder here too
@@ -232,8 +250,13 @@ class PopulationSet:
         Phylo.write(self.majorityTree, treefile, format='newick')
         print(f'wrote {treefile}')
         Phylo.draw_ascii(self.majorityTree)
-
-        #Phylo.draw(self.majorityTree)
+    def visualizeDM(self):
+        import seaborn as sns 
+        orderedPops = [clade.name for clade in self.majorityTree.get_terminals()]
+        dm = pd.DataFrame(self.dmNei, columns=self.popnames, index=self.popnames) 
+        dm = dm[orderedPops].reindex(orderedPops) ## arrange rows and columns according to tree
+        ax = sns.heatmap(dm)
+        Phylo.draw(self.majorityTree)
 
 if __name__ == "__main__":
     #genes = {g: Gene(gene=g) for g in ['A', 'B']}

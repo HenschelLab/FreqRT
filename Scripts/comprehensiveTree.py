@@ -16,7 +16,7 @@ import pickle
 import numpy as np
 allGenes = ['A', 'B', 'C', 'DPA1', 'DPB1', 'DQA1', 'DQB1', 'DRB1']
 ## TODO: read this from command line args
-with open('../Data/hlaAllPoly.pcl', 'rb') as f: genes = pickle.load(f) ## TODO: precalc other genes!
+with open('../Data/hlaAllPoly.pcl', 'rb') as f: genes = pickle.load(f) 
 for gene in allGenes:
     if not gene in genes:
         genes[gene] = Gene(gene=gene)
@@ -27,7 +27,7 @@ ptree.fix()
 stripsum = lambda x: [e[4:] for e in x]
 #selectedGenes = ['A', 'B', 'DRB1', 'DQB1']
 minPopSize = 50 
-for nrGenes in range(2,7):
+for nrGenes in []:#range(2,7): CHAMGE!!!!
     print(nrGenes)
     ps = ptree.exploreGoodCombinations(nrGenes=nrGenes)[-3:]
     geneCombinations = [stripsum(com[1:]) for com in ps] 

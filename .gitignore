@@ -17,3 +17,5 @@ Results/Trees/*
 Data/pops*pcl
 Data/hlaAllPoly.pcl
 Data/pops_pcl.tgz
+Results/Trees2/pops_*.svg
+ManuscriptBootstrapping/Tables/*.tex

@@ -1,10 +1,10 @@
-# FreqRT
+# FreqRT - Frequency based Robust Trees
 
 ([fr&#0230;kkert] danish for cheeky person, also affectionate)
 
 The goal is to provide a method that allows to draw phylogenetic trees from allele frequencies of few but hyperpolymorphic genes, while doing reliable bootstrapping.
 For example genes belonging to the MHC have many variable loci, leading to many different alleles.
-Conventional methods for however are not suitable for low numbers of marker
+Conventional methods, however, are not suitable for low numbers of marker
 genes (Phylip, DISPAN, check GenPop), since they perform bootstrapping with gene loci as units.
 
 E.g., in
@@ -27,7 +27,10 @@ look at comprehensiveTree.py
 Python >=3.6, 
 Various python libraries
 * numpy
+* scipy (for Nei distance calculation)
 * BioPython
 * pandas
 * dendropy
 * networkx
+
+Maybe the latter two can be skipped.

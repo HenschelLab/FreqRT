@@ -1,3 +1,5 @@
+"Using BeatifulSoup html parsing to scrape systematically all "
+
 import urllib
 from bs4 import BeautifulSoup
 import pandas as pd

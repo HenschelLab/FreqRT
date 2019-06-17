@@ -1,3 +1,12 @@
+"""This script generates small bsub (IBM's LSF) job queue sub mission scripts, and launches them using 
+subprocess.call. The scipts call the python program parallelBootstrap with three parameters:
+(it uses job arrays)
+    1. the pcl file containing all the population set data
+    2. the basename
+    3. the job array index
+    
+    Currently hardcoded for 100 bootstraps, change simply to 1-1000 in #BSUB -J directive"""
+
 import subprocess
 import glob, os
 import time

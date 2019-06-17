@@ -4,12 +4,14 @@ from importlib import reload; import polyBootstrap; reload(polyBootstrap) ## whe
 from polyBootstrap import Population, PopulationSet, Gene, Poly
 import pickle
 import subprocess
+import alleleFreqAPI; reload(alleleFreqAPI)
+from alleleFreqAPI import PopulationTree
 
 ## assuming that this script is run from the Scripts dir
 ## table derived from http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/HLA_types/20181129_HLA_types_full_1000_Genomes_Project_panel.txt, which includes 4 digits
 df = pd.read_csv('../Data/20181129_HLA_types_full_1000_Genomes_Project_panelA.txt', sep='\t').replace('None', pd.np.nan)  
 genes = ['HLA-A 1', 'HLA-A 2', 'HLA-B 1', 'HLA-B 2', 'HLA-C 1', 'HLA-C 2', 'HLA-DQB1 1', 'HLA-DQB1 2', 'HLA-DRB1 1', 'HLA-DRB1 2']
-#genes = 'A B C DQB1 DRB1'.split()[:3] 
+
 cols = ['Region', 'Population', 'Sample ID'] + genes[:6]
 genesShort = [g.split()[0].split('-')[-1] for g in genes[:6:2]]  
 df = df[cols].dropna(how='any')
@@ -49,6 +51,7 @@ http://www.internationalgenome.org/faq/which-populations-are-part-your-study
          """
 
 def makePop(pop, df, afbased=True):
+    print (f"Dealing with Population {pop}")
     df1 = df[df.Population == pop]
     ## jackknifing: compose populations randomly, equal size
     df2 = df1.sample(n=popSize, random_state=1)
@@ -64,19 +67,27 @@ def makePop(pop, df, afbased=True):
         population.readVCF(genesShort)
     return population
 
+def runPhylip(ps, basename):
+    ptree = PopulationTree(precalc=False)
+    ptree.df = ps.makeAFtable() ## emulate the previously used spreadsheet format for af's
+    ptree.fix(renameCols=False, lastCol=ptree.df.columns.values[-3])
+    ptree.runPhylipGenDist(basename, selectedLoci = genesShort, selectedPops=False)
+    ptree.runPhylipNeighbor() 
+    ptree.renamingPopulationsInTree()
+
 popSelection = 'YRI GBR IBS CEU PJL PUR ACB CLM GIH PEL JPT'.split()
 popCounts = Counter(df.Population)
 popSize = min([popCounts[pop] for pop in popSelection])
 #popSize = 90 
 
-with open('../Data/hlaABPoly.pcl', 'rb') as f: 
-    genesData = pickle.load(f) ## TODO: precalc other genes!
-for gene in genesShort:
-    if not gene in genesData:
-        genesData[gene] = Gene(gene=gene)
+with open('../Data/hlaAllPoly.pcl', 'rb') as f: 
+    genesData = pickle.load(f) 
 
 ps = PopulationSet([makePop(pop, df, afbased=False) for pop in popSelection])
-basenameAF  = f'afbased_{"-".join(genesShort)}_highConf1_ps{popSize}_pops{len(popSelection)}'
-basenameVCF = f'vcfbased_{"-".join(genesShort)}_highConf1_ps{popSize}_pops{len(popSelection)}'
-ps.bootstrap(bootstraps=100, basename=basenameAF, treebuilder='nj', outgroup='YRI')
-ps.bootstrap(bootstraps=100, basename=basenameVCF, treebuilder='nj', outgroup='YRI', afbased=False)
+basenamePhylip  = f'phylip_{"-".join(genesShort)}_ps{popSize}_pops{len(popSelection)}' 
+basenameAF  = f'afbased_{"-".join(genesShort)}_ps{popSize}_pops{len(popSelection)}'
+basenameVCF = f'vcfbased_{"-".join(genesShort)}_ps{popSize}_pops{len(popSelection)}'
+
+runPhylip(ps, basenamePhylip) ## files end up in ../GenDist, needs to be created on first use!
+#ps.bootstrap(bootstraps=100, basename=basenameAF, treebuilder='nj', outgroup='YRI')
+#ps.bootstrap(bootstraps=100, basename=basenameVCF, treebuilder='nj', outgroup='YRI', afbased=False)
